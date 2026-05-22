@@ -1,0 +1,308 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --accent:#1D9E75;
+    --accent-light:#E1F5EE;
+    --wrong:#E24B4A;
+    --wrong-light:#FCEBEB;
+    --warn:#BA7517;
+    --warn-light:#FAEEDA;
+    --card-bg:var(--color-background-primary);
+    --tag-sql:#E6F1FB;
+    --tag-sql-text:#0C447C;
+    --tag-mysql:#E1F5EE;
+    --tag-mysql-text:#085041;
+    --tag-both:#EEEDFE;
+    --tag-both-text:#3C3489;
+  }
+  #root{padding:1.5rem 0;font-family:'Syne',sans-serif;max-width:640px;margin:0 auto}
+  .header{display:flex;align-items:center;gap:12px;margin-bottom:1.5rem}
+  .streak-badge{
+    font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;
+    background:var(--accent-light);color:var(--accent);
+    border-radius:6px;padding:4px 10px;
+    transition:transform .15s,background .3s;
+  }
+  .streak-badge.bump{transform:scale(1.25)}
+  .score-pill{
+    font-family:'JetBrains Mono',monospace;font-size:12px;
+    color:var(--color-text-secondary);
+    border:0.5px solid var(--color-border-tertiary);
+    border-radius:6px;padding:4px 10px;
+  }
+  .title{font-size:20px;font-weight:800;color:var(--color-text-primary);letter-spacing:-.5px}
+
+  .card{
+    background:var(--card-bg);
+    border:0.5px solid var(--color-border-tertiary);
+    border-radius:16px;
+    padding:1.75rem 1.5rem;
+    position:relative;overflow:hidden;
+  }
+  .card::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:3px;
+    background:var(--accent);border-radius:16px 16px 0 0;
+    transition:background .3s;
+  }
+  .card.wrong::before{background:var(--wrong)}
+  .card.almost::before{background:var(--warn)}
+
+  .db-tag{
+    display:inline-block;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+    border-radius:5px;padding:3px 9px;margin-bottom:1rem;
+  }
+  .tag-sql{background:var(--tag-sql);color:var(--tag-sql-text)}
+  .tag-mysql{background:var(--tag-mysql);color:var(--tag-mysql-text)}
+  .tag-both{background:var(--tag-both);color:var(--tag-both-text)}
+
+  .question{font-size:17px;font-weight:700;color:var(--color-text-primary);line-height:1.45;margin-bottom:.35rem}
+  .question-sub{font-size:13px;color:var(--color-text-secondary);margin-bottom:1.25rem;font-family:'JetBrains Mono',monospace}
+
+  .input-row{display:flex;gap:8px;align-items:stretch}
+  .ans-input{
+    flex:1;font-family:'JetBrains Mono',monospace;font-size:15px;
+    padding:10px 14px;border-radius:8px;
+    border:0.5px solid var(--color-border-secondary);
+    background:var(--color-background-secondary);
+    color:var(--color-text-primary);
+    outline:none;transition:border .15s;
+  }
+  .ans-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(29,158,117,.15)}
+  .ans-input.correct-input{border-color:var(--accent);background:var(--accent-light)}
+  .ans-input.wrong-input{border-color:var(--wrong);background:var(--wrong-light)}
+  .ans-input.almost-input{border-color:var(--warn);background:var(--warn-light)}
+
+  .btn{
+    font-family:'Syne',sans-serif;font-weight:700;font-size:14px;
+    padding:10px 18px;border-radius:8px;cursor:pointer;
+    border:0.5px solid var(--color-border-secondary);
+    background:var(--color-background-primary);
+    color:var(--color-text-primary);
+    transition:background .15s,transform .1s;white-space:nowrap;
+  }
+  .btn:hover{background:var(--color-background-secondary)}
+  .btn:active{transform:scale(.97)}
+  .btn-check{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .btn-check:hover{background:#0F6E56}
+  .btn-next{background:var(--color-background-secondary)}
+
+  .feedback{
+    margin-top:1rem;padding:12px 14px;border-radius:8px;
+    font-size:14px;line-height:1.5;
+    display:none;
+  }
+  .feedback.show{display:block}
+  .feedback.correct{background:var(--accent-light);color:#085041}
+  .feedback.wrong{background:var(--wrong-light);color:#501313}
+  .feedback.almost{background:var(--warn-light);color:#412402}
+  .feedback code{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;background:rgba(0,0,0,.07);padding:1px 5px;border-radius:3px}
+
+  .hint-btn{
+    font-size:12px;color:var(--color-text-secondary);background:none;border:none;
+    cursor:pointer;padding:0;margin-top:.6rem;text-decoration:underline;font-family:'Syne',sans-serif;
+  }
+  .hint-btn:hover{color:var(--color-text-primary)}
+
+  .progress-bar{height:3px;background:var(--color-background-secondary);border-radius:3px;margin-top:1.25rem;overflow:hidden}
+  .progress-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .4s ease}
+
+  .next-row{display:flex;justify-content:flex-end;margin-top:1rem;gap:8px;align-items:center}
+  .skip-btn{font-size:12px;color:var(--color-text-secondary);background:none;border:none;cursor:pointer;font-family:'Syne',sans-serif;text-decoration:underline}
+  .skip-btn:hover{color:var(--color-text-primary)}
+  .btn-retry{
+    background:var(--warn-light);color:var(--warn);border-color:var(--warn);
+    animation:shake .35s ease;
+  }
+  .btn-retry:hover{background:#f5e0b8}
+  @keyframes shake{
+    0%,100%{transform:translateX(0)}
+    20%{transform:translateX(-4px)}
+    40%{transform:translateX(4px)}
+    60%{transform:translateX(-3px)}
+    80%{transform:translateX(3px)}
+  }
+</style>
+
+<h2 class="sr-only" style="position:absolute;left:-9999px">Entrenador de funciones SQL vs MySQL</h2>
+
+<div id="root">
+  <div class="header">
+    <span class="title">SQL Trainer</span>
+    <span class="streak-badge" id="streak">🔥 0</span>
+    <span class="score-pill" id="score">0/0</span>
+  </div>
+
+  <div class="card" id="card">
+    <span class="db-tag" id="db-tag"></span>
+    <p class="question" id="question"></p>
+    <p class="question-sub" id="q-sub"></p>
+    <div class="input-row">
+      <input class="ans-input" type="text" id="ans-input" placeholder="Escribí la función..." autocomplete="off" spellcheck="false"/>
+      <button class="btn btn-check" id="check-btn">Verificar</button>
+    </div>
+    <button class="hint-btn" id="hint-btn">ver pista</button>
+    <div class="feedback" id="feedback"></div>
+    <div class="next-row" id="next-row" style="display:none">
+      <button class="skip-btn" id="skip-btn">saltar →</button>
+      <button class="btn btn-retry" id="retry-btn" style="display:none">↩ Reintentar</button>
+      <button class="btn btn-next" id="next-btn">Siguiente ↗</button>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+  </div>
+</div>
+
+<script>
+const RAW = [
+  {concept:"Primeros N registros",db:"SQL Server",q:"¿Cómo pedís los primeros 10 registros?",answer:"TOP 10",hint:"Va después del SELECT",example:"SELECT TOP 10 * FROM tabla"},
+  {concept:"Primeros N registros",db:"MySQL",q:"¿Cómo limitás los resultados a 10 filas?",answer:"LIMIT 10",hint:"Va al final del query",example:"SELECT * FROM tabla LIMIT 10"},
+  {concept:"Fecha y hora actual",db:"SQL Server",q:"¿Qué función devuelve la fecha y hora actual?",answer:"GETDATE()",hint:"Empieza con GET",example:"SELECT GETDATE()"},
+  {concept:"Fecha y hora actual",db:"MySQL",q:"¿Qué función devuelve la fecha y hora actual?",answer:"NOW()",hint:"Como 'ahora' en inglés",example:"SELECT NOW()"},
+  {concept:"Solo fecha actual",db:"SQL Server",q:"¿Cómo obtenés solo la fecha actual (sin hora)?",answer:"CAST(GETDATE() AS DATE)",hint:"Usás CAST para convertir el tipo",example:"SELECT CAST(GETDATE() AS DATE)"},
+  {concept:"Solo fecha actual",db:"MySQL",q:"¿Qué función devuelve solo la fecha actual?",answer:"CURDATE()",hint:"CUR de 'current'",example:"SELECT CURDATE()"},
+  {concept:"Concatenar texto",db:"SQL Server",q:"¿Cómo concatenás nombre y apellido?",answer:"nombre + ' ' + apellido",hint:"Usás el operador +",example:"SELECT nombre + ' ' + apellido FROM tabla"},
+  {concept:"Concatenar texto",db:"MySQL",q:"¿Qué función usás para concatenar nombre y apellido?",answer:"CONCAT(nombre, ' ', apellido)",hint:"CONCAT recibe varios parámetros",example:"SELECT CONCAT(nombre, ' ', apellido) FROM tabla"},
+  {concept:"Nulos",db:"SQL Server",q:"¿Qué función reemplaza un valor nulo por otro?",answer:"ISNULL(campo, valor)",hint:"IS + NULL",example:"SELECT ISNULL(telefono, 'N/A') FROM tabla"},
+  {concept:"Nulos",db:"MySQL",q:"¿Qué función reemplaza NULL por un valor alternativo?",answer:"IFNULL(campo, valor)",hint:"IF + NULL",example:"SELECT IFNULL(telefono, 'N/A') FROM tabla"},
+  {concept:"Diferencia de fechas",db:"SQL Server",q:"¿Cómo calculás la diferencia en días entre dos fechas?",answer:"DATEDIFF(DAY, fecha1, fecha2)",hint:"El primer parámetro es la unidad",example:"SELECT DATEDIFF(DAY, '2024-01-01', '2024-12-31')"},
+  {concept:"Diferencia de fechas",db:"MySQL",q:"¿Cómo calculás la diferencia en días entre dos fechas?",answer:"DATEDIFF(fecha2, fecha1)",hint:"Solo dos parámetros, al revés del orden",example:"SELECT DATEDIFF('2024-12-31', '2024-01-01')"},
+  {concept:"Diferencia en años",db:"SQL Server",q:"¿Cómo calculás la diferencia en años entre dos fechas?",answer:"DATEDIFF(YEAR, fecha1, fecha2)",hint:"Es DATEDIFF con YEAR como unidad",example:"SELECT DATEDIFF(YEAR, '1990-01-01', GETDATE())"},
+  {concept:"Diferencia en años",db:"MySQL",q:"¿Qué función calcula la diferencia en años?",answer:"TIMESTAMPDIFF(YEAR, fecha1, fecha2)",hint:"TIMESTAMP + DIFF",example:"SELECT TIMESTAMPDIFF(YEAR, '1990-01-01', NOW())"},
+  {concept:"Sumar fechas",db:"SQL Server",q:"¿Cómo sumás 10 días a una fecha?",answer:"DATEADD(DAY, 10, fecha)",hint:"DATE + ADD, primero la unidad",example:"SELECT DATEADD(DAY, 10, GETDATE())"},
+  {concept:"Sumar fechas",db:"MySQL",q:"¿Cómo sumás 10 días a una fecha?",answer:"DATE_ADD(fecha, INTERVAL 10 DAY)",hint:"Usás INTERVAL",example:"SELECT DATE_ADD(NOW(), INTERVAL 10 DAY)"},
+  {concept:"Restar fechas",db:"SQL Server",q:"¿Cómo restás 10 días a una fecha?",answer:"DATEADD(DAY, -10, fecha)",hint:"DATEADD con número negativo",example:"SELECT DATEADD(DAY, -10, GETDATE())"},
+  {concept:"Restar fechas",db:"MySQL",q:"¿Cómo restás 10 días a una fecha?",answer:"DATE_SUB(fecha, INTERVAL 10 DAY)",hint:"DATE_SUB en vez de DATE_ADD",example:"SELECT DATE_SUB(NOW(), INTERVAL 10 DAY)"},
+];
+
+let pool=[], current=null, streak=0, total=0, correct=0, answered=false;
+
+function shuffle(a){let b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
+
+function refillPool(){pool=shuffle(RAW)}
+
+function nextQ(){
+  if(pool.length===0) refillPool();
+  current=pool.pop();
+  answered=false;
+
+  const card=document.getElementById('card');
+  card.className='card';
+  
+  const tag=document.getElementById('db-tag');
+  tag.textContent=current.db;
+  tag.className='db-tag '+(current.db==='SQL Server'?'tag-sql':'tag-mysql');
+
+  document.getElementById('question').textContent=current.q;
+  document.getElementById('q-sub').textContent='[ '+current.db+' ]';
+
+  const inp=document.getElementById('ans-input');
+  inp.value='';
+  inp.className='ans-input';
+  inp.disabled=false;
+  inp.focus();
+
+  document.getElementById('feedback').className='feedback';
+  document.getElementById('feedback').innerHTML='';
+  document.getElementById('next-row').style.display='none';
+  document.getElementById('hint-btn').style.display='block';
+  document.getElementById('hint-btn').textContent='ver pista';
+
+  const fill=Math.round((correct/(Math.max(total,1)))*100);
+  document.getElementById('progress').style.width=fill+'%';
+}
+
+function normalize(s){return s.toLowerCase().replace(/\s+/g,'').replace(/[''']/g,"'")}
+
+function retryQ(){
+  answered=false;
+  const inp=document.getElementById('ans-input');
+  inp.value='';
+  inp.className='ans-input';
+  inp.disabled=false;
+  inp.focus();
+
+  const card=document.getElementById('card');
+  card.className='card';
+
+  document.getElementById('feedback').className='feedback';
+  document.getElementById('feedback').innerHTML='';
+  document.getElementById('next-row').style.display='none';
+  document.getElementById('retry-btn').style.display='none';
+  document.getElementById('hint-btn').style.display='block';
+}
+
+function checkAnswer(){
+  if(answered) return;
+  const inp=document.getElementById('ans-input');
+  const val=inp.value.trim();
+  if(!val) return;
+
+  answered=true;
+  total++;
+  const fb=document.getElementById('feedback');
+  const card=document.getElementById('card');
+  const nv=normalize(val), na=normalize(current.answer);
+  const retryBtn=document.getElementById('retry-btn');
+
+  let isCorrect=nv===na;
+  let isAlmost=!isCorrect && (nv.includes(na.substring(0,Math.min(5,na.length))) || na.includes(nv.substring(0,Math.min(5,nv.length))));
+
+  if(isCorrect){
+    correct++;streak++;
+    inp.className='ans-input correct-input';
+    card.className='card';
+    fb.className='feedback correct show';
+    fb.innerHTML='<strong>✓ ¡Correcto!</strong> '+current.example;
+    retryBtn.style.display='none';
+  } else if(isAlmost){
+    streak=0;
+    inp.className='ans-input almost-input';
+    card.className='card almost';
+    fb.className='feedback almost show';
+    fb.innerHTML='<strong>Casi.</strong> La respuesta exacta es <code>'+current.answer+'</code>';
+    retryBtn.style.display='';
+    retryBtn.className='btn btn-retry';
+  } else {
+    streak=0;
+    inp.className='ans-input wrong-input';
+    card.className='card wrong';
+    fb.className='feedback wrong show';
+    fb.innerHTML='<strong>No era esa.</strong> La correcta es <code>'+current.answer+'</code><br><small>Ejemplo: '+current.example+'</small>';
+    retryBtn.style.display='';
+    retryBtn.className='btn btn-retry';
+  }
+
+  document.getElementById('score').textContent=correct+'/'+total;
+  const sb=document.getElementById('streak');
+  sb.textContent='🔥 '+streak;
+  sb.classList.add('bump');
+  setTimeout(()=>sb.classList.remove('bump'),300);
+
+  document.getElementById('next-row').style.display='flex';
+  document.getElementById('hint-btn').style.display='none';
+  inp.disabled=true;
+
+  const fill=Math.round((correct/total)*100);
+  document.getElementById('progress').style.width=fill+'%';
+}
+
+document.getElementById('check-btn').addEventListener('click',checkAnswer);
+document.getElementById('retry-btn').addEventListener('click',retryQ);
+document.getElementById('ans-input').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    if(answered) nextQ();
+    else checkAnswer();
+  }
+});
+document.getElementById('next-btn').addEventListener('click',nextQ);
+document.getElementById('skip-btn').addEventListener('click',nextQ);
+document.getElementById('hint-btn').addEventListener('click',function(){
+  this.textContent=current.hint;
+  this.style.color='var(--warn)';
+  this.disabled=true;
+});
+
+refillPool();
+nextQ();
+</script>
